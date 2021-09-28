@@ -86,3 +86,20 @@ The code given is structured as follows. Feel free however to modify the structu
 * [Sqlite3](https://sqlite.org/index.html) - Database storage engine
 
 Happy hacking 😁!
+
+## Thought Process
+
+### Initial Setup
+27th of September
+* Familiarised myself with the codebase
+* Set branch protection rules for branch `master`
+* Created a project board in github
+  
+### Analyzing requirements
+The invoice needs to be charged on the first of the month. 
+So we will need to get the local timezone for each user. At the moment we don't have that information supplied so lets
+add it in.
+
+
+
+

@@ -6,13 +6,15 @@ import io.pleo.antaeus.models.Invoice
 import io.pleo.antaeus.models.InvoiceStatus
 import io.pleo.antaeus.models.Money
 import java.math.BigDecimal
+import java.util.*
 import kotlin.random.Random
 
 // This will create all schemas and setup initial data
 internal fun setupInitialData(dal: AntaeusDal) {
     val customers = (1..100).mapNotNull {
         dal.createCustomer(
-            currency = Currency.values()[Random.nextInt(0, Currency.values().size)]
+            currency = Currency.values()[Random.nextInt(0, Currency.values().size)],
+            timezone = TimeZone.getAvailableIDs()[Random.nextInt(0, TimeZone.getAvailableIDs().size)]
         )
     }
 

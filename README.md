@@ -89,11 +89,17 @@ Happy hacking 😁!
 
 ## Thought Process
 
-### Approach
+### Initial Setup
 27th of September
 * Familiarised myself with the codebase
 * Set branch protection rules for branch `master`
 * Created a project board in github
+  
+### Analyzing requirements
+The invoice needs to be charged on the first of the month. 
+So we will need to get the local timezone for each user. At the moment we have the currency as information and we
+could figure out the timezone from that. 
+
 
 
 

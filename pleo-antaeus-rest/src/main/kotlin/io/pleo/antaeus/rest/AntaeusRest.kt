@@ -5,19 +5,27 @@
 package io.pleo.antaeus.rest
 
 import io.javalin.Javalin
-import io.javalin.apibuilder.ApiBuilder.get
-import io.javalin.apibuilder.ApiBuilder.path
+import io.javalin.apibuilder.ApiBuilder.*
+import io.javalin.http.Context
+import io.pleo.antaeus.core.currentTime
 import io.pleo.antaeus.core.exceptions.EntityNotFoundException
+import io.pleo.antaeus.core.formatDateTo
+import io.pleo.antaeus.core.services.BillingService
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
 import mu.KotlinLogging
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 private val thisFile: () -> Unit = {}
 
 class AntaeusRest(
     private val invoiceService: InvoiceService,
-    private val customerService: CustomerService
+    private val customerService: CustomerService,
+    private val billingService: BillingService
 ) : Runnable {
 
     override fun run() {
@@ -67,6 +75,37 @@ class AntaeusRest(
                         }
                     }
 
+                    path("time") {
+                        // URL: /rest/v1/time
+                        get {
+                            val formatter = DateTimeFormatter
+                                .ofLocalizedDate(FormatStyle.LONG)
+                                .withZone(TimeZone.getDefault().toZoneId())
+                            it.json(formatter.format(Instant.now()))
+                        }
+
+                        // URL: /rest/v1/time/timezone
+                        get("timezone") {
+                            // Returns the default timezone
+                            it.json(TimeZone.getDefault().toString())
+                        }
+
+
+                        // For testing purposes set the time in the future
+                        // URL: /rest/v1/time/{timeInMillis}
+                        post(":timeInMillis") {
+                            startBillingServiceForTest(it)
+                        }
+
+                        // For testing purposes set the time in the future with infinite retries
+                        // URL: /rest/v1/time/infiniteRetries/{timeInMillis}
+                        path("infiniteRetries") {
+                            post(":timeInMillis") {
+                                startBillingServiceForTest(it, infiniteRetries = true)
+                            }
+                        }
+                    }
+
                     path("customers") {
                         // URL: /rest/v1/customers
                         get {
@@ -82,4 +121,13 @@ class AntaeusRest(
             }
         }
     }
+
+    private fun startBillingServiceForTest(it: Context, infiniteRetries: Boolean = false) {
+        val time = it.pathParam("timeInMillis").toLong()
+        currentTime = time
+        billingService.mockStart(infiniteRetries)
+        if (infiniteRetries) it.json("Time was set successfully with infinite retries :)")
+        else it.json("Time was set successfully :)")
+    }
+
 }

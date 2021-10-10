@@ -14,8 +14,8 @@ import java.util.*
 import kotlin.random.Random
 
 /**
- * Attempt to test the [BillingService]. This test take too long to complete
- * An alternative would to be mock the db and the dal
+ * Attempt to test the [BillingService].
+ * An alternative would to be mock the db and the dal instead of mocking data?
  * Disabled
  *
  */

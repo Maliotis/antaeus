@@ -149,6 +149,11 @@ for providing a pool of thread and assigning tasks to the different thread/s.
 
 An alternative would be to use [Kotlin-Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) to handle asynchronous tasks
 
+### Testing
+
+I decided to test mostly the business logic. There was an attempt to test the BillingService end-to-end
+but decided not to proceed with it in the end as it seemed unnecessary.
+
 
 
 

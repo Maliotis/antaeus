@@ -25,8 +25,8 @@ class BillingServiceTest {
     lateinit var customers: List<Customer>
     lateinit var invoices: MutableList<Invoice>
 
-    @BeforeAll
-    @Disabled
+    //@BeforeAll
+    //@Disabled
     internal fun setUp() {
         `setup mockk initial data`()
     }
@@ -68,8 +68,8 @@ class BillingServiceTest {
         }
     }
 
-    @Test
-    @Disabled
+    //@Test
+    //@Disabled
     fun `test billingService charging invoice with infinite retries`() {
         val slotCustomerId = slot<Int>()
         val slotInvoicesForTaskCharge = slot<MutableList<Invoice>>()
@@ -100,14 +100,14 @@ class BillingServiceTest {
 
         billingService.retryChargeTaskInfinite = true
         billingService.delayChargeTask = 0L
-        billingService.start()
+        //billingService.start()
         // and check invoices
         val anyInvoiceInPendingState = invoices.any { it.status == InvoiceStatus.PENDING }
         assert(!anyInvoiceInPendingState)
     }
 
-    @AfterAll
-    @Disabled
+    //@AfterAll
+    //@Disabled
     fun clean() {
         unmockkAll()
     }

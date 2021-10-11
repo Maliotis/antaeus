@@ -15,6 +15,7 @@ import io.pleo.antaeus.data.AntaeusDal
 import io.pleo.antaeus.data.CustomerTable
 import io.pleo.antaeus.data.InvoiceTable
 import io.pleo.antaeus.rest.AntaeusRest
+import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -24,8 +25,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import setupInitialData
 import java.io.File
 import java.sql.Connection
+import kotlinx.coroutines.runBlocking
 
-fun main() {
+fun main(): Unit = runBlocking {
     // The tables to create in the database.
     val tables = arrayOf(InvoiceTable, CustomerTable)
 
@@ -66,12 +68,14 @@ fun main() {
         customerService = customerService,
         invoiceService = invoiceService
     )
-    billingService.start()
+    launch { billingService.start() }
 
     // Create REST web service
+
     AntaeusRest(
         invoiceService = invoiceService,
         customerService = customerService,
         billingService = billingService
     ).run()
+
 }

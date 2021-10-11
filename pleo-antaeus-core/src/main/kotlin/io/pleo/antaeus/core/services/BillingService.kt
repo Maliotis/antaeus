@@ -1,5 +1,6 @@
 package io.pleo.antaeus.core.services
 
+import dev.inmo.krontab.doInfinity
 import io.pleo.antaeus.core.currentTime
 import io.pleo.antaeus.core.tasks.MonthlyChargeTask
 import io.pleo.antaeus.core.external.PaymentProvider
@@ -7,6 +8,7 @@ import io.pleo.antaeus.core.getExecutionTime
 import io.pleo.antaeus.core.setCalendarToFirstDayOfTheMonth
 import io.pleo.antaeus.models.Customer
 import io.pleo.antaeus.models.Invoice
+import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.*
 
@@ -16,7 +18,7 @@ class BillingService(
     val invoiceService: InvoiceService
 ) {
     private val customerIdToCustomer = mutableMapOf<Int, Customer>()
-    lateinit var executor: ScheduledExecutorService
+    lateinit var scheduledExecutorService: ScheduledExecutorService
     // Change to true for testing purposes
     internal var retryChargeTaskInfinite = false
     internal var delayChargeTask = 1000L
@@ -49,19 +51,25 @@ class BillingService(
         return invoiceService.fetchPendingInvoices()
     }
 
-    fun start() {
+    suspend fun start() {
+        println("BillingService start")
+        scheduledExecutorService = scheduleMonthlyCharges()
+        scheduleEveryMonth()
+    }
+
+    private suspend fun scheduleEveryMonth() {
+        // sec / min / hour / dayOfMonth / month /...
+        doInfinity("0 0 0 1 *") {
+            println("next month schedule monthly charges")
+            scheduledExecutorService = scheduleMonthlyCharges()
+        }
+    }
+
+    private fun scheduleMonthlyCharges(): ScheduledExecutorService {
         val nowDate = Date(currentTime)
         val firstDayOfMonth = setCalendarToFirstDayOfTheMonth(date = nowDate)
         val pendingInvoices = getPendingInvoices()
         val timezoneToInvoices = assignTimezoneToInvoices(pendingInvoices)
-        executor = scheduleMonthlyCharges(timezoneToInvoices, nowDate, firstDayOfMonth)
-    }
-
-    internal fun scheduleMonthlyCharges(
-        timezoneToInvoices: MutableMap<TimeZone, MutableList<Invoice>>,
-        nowDate: Date,
-        firstDayOfMonth: Calendar
-    ): ScheduledExecutorService {
         val threadPoolSize = timezoneToInvoices.keys.size
         val executor = Executors.newScheduledThreadPool(threadPoolSize)
 
@@ -77,7 +85,6 @@ class BillingService(
             val executionTime = getExecutionTime(timeZone, nowDate, firstDayOfMonth)
             // executing a batch of invoices that have the same timezone
             scheduleMonthlyChargeTask(executor, invoices, executionTime)
-
         }
         return executor
     }
@@ -117,16 +124,18 @@ class BillingService(
      * To be used for testing. It will stop all other tasks that are scheduled to happen in the future
      */
     fun mockStart(infiniteRetries: Boolean) {
-        clearAndShutdown()
-        if (infiniteRetries) {
-            retryChargeTaskInfinite = true
-            delayChargeTask = 0L
+        CoroutineScope(Dispatchers.Default).launch {
+            clearAndShutdown()
+            if (infiniteRetries) {
+                retryChargeTaskInfinite = true
+                delayChargeTask = 0L
+            }
+            start()
         }
-        start()
     }
 
     private fun clearAndShutdown() {
         customerIdToCustomer.clear()
-        executor.shutdown()
+        scheduledExecutorService.shutdown()
     }
 }

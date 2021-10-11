@@ -13,6 +13,13 @@ fun Project.kotlinProject() {
         // Kotlin libs
         "implementation"(kotlin("stdlib"))
 
+        // To silence warning
+        // Runtime JAR files in the classpath should have the same version. These files were found in the classpath:
+        "implementation"("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
+
+        // Cron
+        "implementation"("dev.inmo:krontab:0.6.5")
+
         // Logging
         "implementation"("org.slf4j:slf4j-simple:1.7.30")
         "implementation"("io.github.microutils:kotlin-logging:1.7.8")

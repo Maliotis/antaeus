@@ -147,13 +147,18 @@ We will also limit the time of retries to 2.
 We will use the [ExecutorService](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html) api to run tasks asynchronously as it provides and easy to use interface
 for providing a pool of thread and assigning tasks to the different thread/s.
 
-An alternative would be to use [Kotlin-Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) to handle asynchronous tasks
+An alternative would be to use [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) to handle asynchronous tasks
 
 ### Testing
 
 I decided to test mostly the business logic. There was an attempt to test the BillingService end-to-end
 but decided not to proceed with it in the end as it seemed unnecessary.
 
+### Late Additions
+
+Added an external library [krontab](https://github.com/InsanusMokrassar/krontab) to easily schedule tasks every month with crontab.
+That required the addition of [Coroutines]((https://kotlinlang.org/docs/coroutines-overview.html)) as well. An alternative to krontab would be [Quartz](http://www.quartz-scheduler.org)
 
 
+Given more time I would like to change the ExecutorService with Coroutines, so that one framework for scheduling/maintaining background tasks is used.
 
